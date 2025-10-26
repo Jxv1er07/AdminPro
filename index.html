@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdminPro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+      background: #f3f4f6;
+      padding-bottom: 80px;
+    }
+    .header {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header h1 { font-size: 24px; margin-bottom: 5px; }
+    .header p { font-size: 12px; opacity: 0.9; }
+    .container { padding: 20px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .kpi {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .kpi.red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+    .kpi.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .kpi.purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+    .kpi p { font-size: 12px; opacity: 0.9; margin-bottom: 5px; }
+    .kpi h3 { font-size: 24px; font-weight: bold; }
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-delete {
+      background: #ef4444;
+      padding: 8px 12px;
+      font-size: 12px;
+      width: auto;
+      margin-top: 0;
+    }
+    .tabs {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #6b7280;
+      border: none;
+      background: none;
+    }
+    .tab.active { color: #2563eb; font-weight: 600; }
+    .tab-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+    .item {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 15px 0;
+    }
+    .item:last-child { border-bottom: none; }
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 8px;
+    }
+    .item-title { font-weight: 600; font-size: 14px; }
+    .item-amount {
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .item-amount.green { color: #10b981; }
+    .item-amount.red { color: #ef4444; }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+    .badge.green { background: #d1fae5; color: #059669; }
+    .badge.red { background: #fee2e2; color: #dc2626; }
+    .badge.yellow { background: #fef3c7; color: #d97706; }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      width: 90%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 16px 16px 0 0;
+    }
+    .modal-body { padding: 20px; }
+    .tutorial {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    .tutorial.show { display: flex; }
+    .tutorial-content {
+      background: white;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      overflow: hidden;
+    }
+    .tutorial-header {
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .tutorial-emoji { font-size: 60px; margin-bottom: 15px; }
+    .tutorial-body { padding: 25px; text-align: center; }
+    .progress-bar {
+      background: #e5e7eb;
+      height: 6px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
+      height: 100%;
+      transition: width 0.3s;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .empty-state-icon { font-size: 60px; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>AdminPro</h1>
+    <p>Gestión Empresarial</p>
+  </div>
+
+  <div class="container" id="content"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showView('dashboard')">
+      <span class="tab-icon">📊</span>
+      Dashboard
+    </button>
+    <button class="tab" onclick="showView('finanzas')">
+      <span class="tab-icon">💰</span>
+      Finanzas
+    </button>
+    <button class="tab" onclick="showView('inventario')">
+      <span class="tab-icon">📦</span>
+      Inventario
+    </button>
+    <button class="tab" onclick="showView('clientes')">
+      <span class="tab-icon">👥</span>
+      Clientes
+    </button>
+  </div>
+
+  <div id="modal" class="modal"></div>
+  <div id="tutorial" class="tutorial"></div>
+
+  <script>
+    let data = {
+      transactions: JSON.parse(localStorage.getItem('transactions') || '[]'),
+      products: JSON.parse(localStorage.getItem('products') || '[]'),
+      clients: JSON.parse(localStorage.getItem('clients') || '[]')
+    };
+
+    let currentView = 'dashboard';
+    let tutorialStep = 0;
+
+    const tutorials = [
+      { emoji: '👋', title: '¡Bienvenido a AdminPro!', text: 'Tu plataforma de gestión empresarial. Te mostraremos cómo usarla en 5 pasos.' },
+      { emoji: '📊', title: 'Dashboard', text: 'Aquí verás el resumen de tu negocio: ingresos, egresos y alertas importantes.' },
+      { emoji: '💰', title: 'Finanzas', text: 'Registra tus ingresos y egresos. Usa el botón azul para agregar transacciones.' },
+      { emoji: '📦', title: 'Inventario', text: 'Administra tus productos. Los que tengan menos de 10 unidades se marcarán en rojo.' },
+      { emoji: '👥', title: 'Clientes', text: 'Guarda la información de tus clientes: nombre, email, teléfono y total gastado.' },
+      { emoji: '🎉', title: '¡Listo!', text: 'Ya puedes comenzar a usar AdminPro. Agrega tus primeros datos y explora cada sección.' }
+    ];
+
+    function save() {
+      localStorage.setItem('transactions', JSON.stringify(data.transactions));
+      localStorage.setItem('products', JSON.stringify(data.products));
+      localStorage.setItem('clients', JSON.stringify(data.clients));
+    }
+
+    function money(n) {
+      return '$' + Math.abs(n).toLocaleString('es-CL');
+    }
+
+    function showView(view) {
+      currentView = view;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.closest('.tab').classList.add('active');
+      render();
+    }
+
+    function openModal(type) {
+      let html = '';
+      if (type === 'transaction') {
+        html = `
+          <div class="modal-header"><h2>💰 Nueva Transacción</h2></div>
+          <div class="modal-body">
+            <select id="type"><option>Ingreso</option><option>Egreso</option></select>
+            <input type="text" id="description" placeholder="Descripción" required>
+            <input type="number" id="amount" placeholder="Monto" required>
+            <input type="date" id="date" required>
+            <button class="btn" onclick="saveTransaction()">Guardar</button>
+            <button class="btn" style="background:#6b7280;margin-top:5px" onclick="closeModal()">Cancelar</button>
+          </div>
+        `;
+      } else if (type === 'product') {
+        html = `
+          <div class="modal-header"><h2>📦 Nuevo Producto</h2></div>
+          <div class="modal-body">
+            <input type="text" id="sku" placeholder="SKU (ej: PROD-001)" required>
+            <input type="text" id="name" placeholder="Nombre del producto" required>
+            <input type="number" id="price" placeholder="Precio" required>
+            <input type="number" id="stock" placeholder="Stock" required>
+            <button class="btn" onclick="saveProduct()">Guardar</button>
+            <button class="btn" style="background:#6b7280;margin-top:5px" onclick="closeModal()">Cancelar</button>
+          </div>
+        `;
+      } else if (type === 'client') {
+        html = `
+          <div class="modal-header"><h2>👤 Nuevo Cliente</h2></div>
+          <div class="modal-body">
+            <input type="text" id="name" placeholder="Nombre completo" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="tel" id="phone" placeholder="Teléfono" required>
+            <input type="number" id="total" placeholder="Total gastado (opcional)">
+            <button class="btn" onclick="saveClient()">Guardar</button>
+            <button class="btn" style="background:#6b7280;margin-top:5px" onclick="closeModal()">Cancelar</button>
+          </div>
+        `;
+      }
+      document.getElementById('modal').innerHTML = html;
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
+
+    function saveTransaction() {
+      const type = document.getElementById('type').value;
+      const description = document.getElementById('description').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const date = document.getElementById('date').value;
+
+      if (!description || !amount || !date) {
+        alert('Completa todos los campos');
+        return;
+      }
+
+      data.transactions.unshift({
+        id: Date.now(),
+        type,
+        description,
+        amount: type === 'Ingreso' ? amount : -amount,
+        date
+      });
+
+      save();
+      closeModal();
+      alert('✅ Transacción guardada');
+      render();
+    }
+
+    function saveProduct() {
+      const sku = document.getElementById('sku').value;
+      const name = document.getElementById('name').value;
+      const price = parseFloat(document.getElementById('price').value);
+      const stock = parseInt(document.getElementById('stock').value);
+
+      if (!sku || !name || !price || !stock) {
+        alert('Completa todos los campos');
+        return;
+      }
+
+      data.products.push({
+        id: Date.now(),
+        sku, name, price, stock
+      });
+
+      save();
+      closeModal();
+      alert('✅ Producto guardado');
+      render();
+    }
+
+    function saveClient() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const total = parseFloat(document.getElementById('total').value) || 0;
+
+      if (!name || !email || !phone) {
+        alert('Completa todos los campos obligatorios');
+        return;
+      }
+
+      data.clients.push({
+        id: Date.now(),
+        name, email, phone, total
+      });
+
+      save();
+      closeModal();
+      alert('✅ Cliente guardado');
+      render();
+    }
+
+    function deleteItem(type, id) {
+      if (confirm('¿Eliminar este elemento?')) {
+        data[type] = data[type].filter(item => item.id !== id);
+        save();
+        render();
+        alert('✅ Eliminado');
+      }
+    }
+
+    function showTutorial() {
+      const t = tutorials[tutorialStep];
+      const progress = ((tutorialStep + 1) / tutorials.length) * 100;
+      
+      document.getElementById('tutorial').innerHTML = `
+        <div class="tutorial-content">
+          <div class="tutorial-header">
+            <div class="tutorial-emoji">${t.emoji}</div>
+            <h2>${t.title}</h2>
+          </div>
+          <div class="tutorial-body">
+            <p style="color:#4b5563;line-height:1.6;margin-bottom:20px">${t.text}</p>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:${progress}%"></div>
+            </div>
+            <p style="font-size:12px;color:#9ca3af;margin-bottom:20px">Paso ${tutorialStep + 1} de ${tutorials.length}</p>
+            <button class="btn" onclick="nextTutorial()">${tutorialStep === tutorials.length - 1 ? '¡Comenzar! ✨' : 'Siguiente →'}</button>
+            ${tutorialStep < tutorials.length - 1 ? '<button class="btn" style="background:#6b7280;margin-top:5px" onclick="closeTutorial()">Omitir</button>' : ''}
+          </div>
+        </div>
+      `;
+      document.getElementById('tutorial').classList.add('show');
+    }
+
+    function nextTutorial() {
+      tutorialStep++;
+      if (tutorialStep >= tutorials.length) {
+        closeTutorial();
+      } else {
+        showTutorial();
+      }
+    }
+
+    function closeTutorial() {
+      document.getElementById('tutorial').classList.remove('show');
+      localStorage.setItem('tutorialDone', 'true');
+    }
+
+    function render() {
+      const income = data.transactions.filter(t => t.type === 'Ingreso').reduce((s, t) => s + t.amount, 0);
+      const expenses = Math.abs(data.transactions.filter(t => t.type === 'Egreso').reduce((s, t) => s + t.amount, 0));
+      const balance = income - expenses;
+      const lowStock = data.products.filter(p => p.stock < 10);
+
+      let html = '';
+
+      if (currentView === 'dashboard') {
+        html = `
+          <div class="kpi-grid">
+            <div class="kpi"><p>Ingresos</p><h3>${money(income)}</h3></div>
+            <div class="kpi red"><p>Egresos</p><h3>${money(expenses)}</h3></div>
+            <div class="kpi blue"><p>Balance</p><h3>${money(balance)}</h3></div>
+            <div class="kpi purple"><p>Productos</p><h3>${data.products.length}</h3></div>
+          </div>
+
+          ${lowStock.length > 0 ? `
+            <div class="card">
+              <h3 style="margin-bottom:15px">⚠️ Stock Bajo</h3>
+              ${lowStock.map(p => `
+                <div class="item">
+                  <div class="item-header">
+                    <div>
+                      <div class="item-title">${p.name}</div>
+                      <small style="color:#6b7280">${p.sku}</small>
+                    </div>
+                    <span class="badge red">${p.stock} unid.</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          ${data.transactions.length > 0 ? `
+            <div class="card">
+              <h3 style="margin-bottom:15px">📊 Últimas Transacciones</h3>
+              ${data.transactions.slice(0, 5).map(t => `
+                <div class="item">
+                  <div class="item-header">
+                    <div>
+                      <div class="item-title">${t.description}</div>
+                      <span class="badge ${t.type === 'Ingreso' ? 'green' : 'red'}">${t.type}</span>
+                    </div>
+                    <div>
+                      <div class="item-amount ${t.amount > 0 ? 'green' : 'red'}">${money(t.amount)}</div>
+                      <small style="color:#6b7280">${t.date}</small>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="card empty-state">
+              <div class="empty-state-icon">📝</div>
+              <p style="color:#6b7280;margin-bottom:15px">Comienza agregando datos</p>
+              <button class="btn" onclick="openModal('transaction')">+ Agregar Transacción</button>
+            </div>
+          `}
+        `;
+      } else if (currentView === 'finanzas') {
+        html = `
+          <div class="kpi-grid">
+            <div class="kpi"><p>Total Ingresos</p><h3>${money(income)}</h3></div>
+            <div class="kpi red"><p>Total Egresos</p><h3>${money(expenses)}</h3></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:15px">💰 Transacciones</h3>
+            <button class="btn" onclick="openModal('transaction')">+ Nueva Transacción</button>
+            ${data.transactions.length > 0 ? data.transactions.map(t => `
+              <div class="item">
+                <div class="item-header">
+                  <div style="flex:1">
+                    <div class="item-title">${t.description}</div>
+                    <span class="badge ${t.type === 'Ingreso' ? 'green' : 'red'}">${t.type}</span>
+                    <div style="font-size:12px;color:#6b7280;margin-top:5px">${t.date}</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="item-amount ${t.amount > 0 ? 'green' : 'red'}">${money(t.amount)}</div>
+                    <button class="btn-delete" onclick="deleteItem('transactions', ${t.id})">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            `).join('') : '<div class="empty-state"><div class="empty-state-icon">📝</div><p style="color:#6b7280">No hay transacciones</p></div>'}
+          </div>
+        `;
+      } else if (currentView === 'inventario') {
+        html = `
+          <div class="card">
+            <h3 style="margin-bottom:15px">📦 Productos</h3>
+            <button class="btn" onclick="openModal('product')">+ Nuevo Producto</button>
+            ${data.products.length > 0 ? data.products.map(p => `
+              <div class="item">
+                <div class="item-header">
+                  <div style="flex:1">
+                    <div class="item-title">${p.name}</div>
+                    <small style="color:#6b7280">${p.sku} • ${money(p.price)}</small>
+                  </div>
+                  <div style="text-align:right">
+                    <span class="badge ${p.stock < 10 ? 'red' : 'green'}">${p.stock} unid.</span>
+                    <button class="btn-delete" style="margin-top:8px" onclick="deleteItem('products', ${p.id})">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            `).join('') : '<div class="empty-state"><div class="empty-state-icon">📦</div><p style="color:#6b7280">No hay productos</p></div>'}
+          </div>
+        `;
+      } else if (currentView === 'clientes') {
+        html = `
+          <div class="card">
+            <h3 style="margin-bottom:15px">👥 Clientes</h3>
+            <button class="btn" onclick="openModal('client')">+ Nuevo Cliente</button>
+            ${data.clients.length > 0 ? data.clients.map(c => `
+              <div class="item">
+                <div class="item-header">
+                  <div style="flex:1">
+                    <div class="item-title">${c.name}</div>
+                    <small style="color:#6b7280">${c.email}<br>${c.phone}</small>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="item-amount blue">${money(c.total)}</div>
+                    <button class="btn-delete" style="margin-top:8px" onclick="deleteItem('clients', ${c.id})">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            `).join('') : '<div class="empty-state"><div class="empty-state-icon">👥</div><p style="color:#6b7280">No hay clientes</p></div>'}
+          </div>
+        `;
+      }
+
+      document.getElementById('content').innerHTML = html;
+    }
+
+    // Iniciar
+    if (!localStorage.getItem('tutorialDone')) {
+      showTutorial();
+    }
+    render();
+  </script>
+
+</body>
+</html>
